@@ -1,6 +1,6 @@
 redis==5.0.7
 rq==1.16.2
-transformers==4.44.2
-torch==2.4.1
-sentencepiece==0.2.0
+transformers==4.48.0
+torch==2.6.0
+sentencepiece==0.2.1
 protobuf==5.29.6
