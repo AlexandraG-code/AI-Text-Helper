@@ -3,4 +3,4 @@ rq==1.16.2
 transformers==4.44.2
 torch==2.4.1
 sentencepiece==0.2.0
-protobuf==5.27.3
+protobuf==5.29.6
