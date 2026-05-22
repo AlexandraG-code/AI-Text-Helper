@@ -1,9 +1,13 @@
 import os
-from flask import Flask, request, jsonify
+import time
+
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from redis import Redis
 from rq import Queue
 from rq.job import Job
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
 from tasks import process_text_task
 
 
@@ -16,8 +20,56 @@ app = Flask(__name__)
 CORS(app)
 
 
+REQUEST_COUNT = Counter(
+    "ai_text_helper_requests_total",
+    "Total number of HTTP requests",
+    ["method", "endpoint", "http_status"]
+)
+
+TASKS_CREATED = Counter(
+    "ai_text_helper_tasks_created_total",
+    "Total number of created text processing tasks",
+    ["mode"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "ai_text_helper_request_duration_seconds",
+    "HTTP request latency",
+    ["method", "endpoint"]
+)
+
+
 redis_conn = Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=False)
 queue = Queue(QUEUE_NAME, connection=redis_conn)
+
+
+@app.before_request
+def before_request():
+    request.start_time = time.time()
+
+
+@app.after_request
+def after_request(response):
+    endpoint = request.path
+
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=endpoint,
+        http_status=response.status_code
+    ).inc()
+
+    if hasattr(request, "start_time"):
+        REQUEST_LATENCY.labels(
+            method=request.method,
+            endpoint=endpoint
+        ).observe(time.time() - request.start_time)
+
+    return response
+
+
+@app.route("/metrics", methods=["GET"])
+def metrics():
+    return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 
 @app.route("/api/health", methods=["GET"])
@@ -61,6 +113,8 @@ def create_task():
         result_ttl=3600,
         failure_ttl=3600
     )
+
+    TASKS_CREATED.labels(mode=mode).inc()
 
     return jsonify({
         "task_id": job.id,

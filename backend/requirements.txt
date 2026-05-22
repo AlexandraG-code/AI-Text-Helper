@@ -4,3 +4,4 @@ gunicorn==22.0.0
 redis==5.0.7
 rq==1.16.2
 pytest==8.3.2
+prometheus-client==0.20.0
