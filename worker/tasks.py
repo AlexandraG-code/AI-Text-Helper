@@ -7,6 +7,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 
 MODEL_NAME = os.getenv("MODEL_NAME", "cointegrated/rut5-small")
+MODEL_REVISION = os.getenv("MODEL_REVISION", "main")
 
 
 @lru_cache(maxsize=1)
@@ -17,9 +18,17 @@ def load_model():
     """
 
     print(f"Loading NLP model: {MODEL_NAME}")
+    print(f"Model revision: {MODEL_REVISION}")
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(
+        MODEL_NAME,
+        revision=MODEL_REVISION
+    )
+
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        MODEL_NAME,
+        revision=MODEL_REVISION
+    )
 
     print("NLP model loaded")
 

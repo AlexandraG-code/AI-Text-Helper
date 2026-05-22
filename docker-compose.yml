@@ -42,6 +42,7 @@ services:
       REDIS_PORT: 6379
       QUEUE_NAME: text_tasks
       MODEL_NAME: cointegrated/rut5-small
+      MODEL_REVISION: main
     depends_on:
       - redis
     networks:
