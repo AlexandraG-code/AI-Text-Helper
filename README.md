@@ -99,7 +99,7 @@ ruT5
 2. Перейти в корень проекта, где находится файл `docker-compose.yml`:
 
 ```bash
-cd ErmolinskayaAA
+cd папка
 ```
 3. Запустить проект командой:
 docker compose up --build
